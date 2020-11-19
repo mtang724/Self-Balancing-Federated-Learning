@@ -32,7 +32,4 @@ class DataProcessor:
         for key in c1.keys():
             d1.append(c1[key] / len(input1))
             d2.append(c2[key] / len(input2))
-        return sp.rel_entr(d1, d2)
-
-
-
+        return sum(sp.rel_entr(d1, d2))

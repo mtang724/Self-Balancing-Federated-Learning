@@ -13,18 +13,18 @@ class DataStore:
 
     def get_input(self, name):
         if name == 'cifar':
-            dimension_size = 3027
+            dimension_size = 3072
             self.train_feature = np.empty((0, dimension_size))
             for i in range(1, 6):
                 with open('./data/cifar/data_batch_{}'.format(i), 'rb') as fo:
                     dic = pickle.load(fo, encoding='bytes')
                 self.train_feature = np.vstack((self.train_feature, dic[b'data']))
-                self.train_label = np.vstack((self.train_label, dic[b'labels']))
+                self.train_label = np.hstack((self.train_label, np.array(dic[b'labels'])))
 
             with open('./data/cifar/test_batch', 'rb') as fo:
                 dic = pickle.load(fo, encoding='bytes')
             self.test_feature = dic[b'data']
-            self.test_label = dic[b'labels']
+            self.test_label = np.array(dic[b'labels'])
 
         elif name == 'mnist':
             def load_mnist(path, kind='train'):
