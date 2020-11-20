@@ -1,0 +1,9 @@
+
+# Visual Studio cache directory
+.vs/
+
+*.xml
+*.iml
+*.pyc
+*.ipynb_checkpoints
+data
