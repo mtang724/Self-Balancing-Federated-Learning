@@ -1,7 +1,7 @@
 # CSCI596-FedLearningProject
 ## Goal: Try to solve data imbalance problem in Federated Learning
 
-### Backgroud:
+### Background:
 **Federated Learning**:
 
 Federated learning (also known as collaborative learning) is a machine learning technique that trains an algorithm across multiple decentralized edge devices or servers holding local data samples, without exchanging them. This approach stands in contrast to traditional centralized machine learning techniques where all the local datasets are uploaded to one server, as well as to more classical decentralized approaches which often assume that local data samples are identically distributed.
@@ -14,7 +14,7 @@ Federated learning (also known as collaborative learning) is a machine learning 
 2) Local Imbalance, i.e., independent and non-identically distribution (non-IID), where each device does not follow a common data distribution; 
 3) Global Imbalance, means that the collection of data in all devices is class imbalanced
 
-**proposed solution**:
+**Proposed solution**:
 
 Paper Link: https://ieeexplore.ieee.org/document/9141436
 
