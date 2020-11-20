@@ -20,7 +20,7 @@ Paper Link: https://ieeexplore.ieee.org/document/9141436
 
 Model Framework:
 
-<img width="700" src="https://user-images.githubusercontent.com/17812876/99761073-0f093280-2aaa-11eb-8b0c-6dbac69a9383.png" alt="modelFramework">
+<img width="600" src="https://user-images.githubusercontent.com/17812876/99761073-0f093280-2aaa-11eb-8b0c-6dbac69a9383.png" alt="modelFramework">
 
 Algorithm Framework:
 
