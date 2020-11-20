@@ -18,9 +18,9 @@ Federated learning (also known as collaborative learning) is a machine learning 
 
 Paper Link: https://ieeexplore.ieee.org/document/9141436
 
-<img align="left" src="https://user-images.githubusercontent.com/17812876/99759104-4fb37c80-2aa7-11eb-8381-86dcb39dc57e.png" alt="modelFramework" style="zoom:50%;" />
+<img align="left" width="700" src="https://user-images.githubusercontent.com/17812876/99759104-4fb37c80-2aa7-11eb-8381-86dcb39dc57e.png" alt="modelFramework">
 
-<img align="left" src="https://user-images.githubusercontent.com/17812876/99760291-424ac200-2aa8-11eb-9a25-a726a840be51.png" alt="algFramework" style="zoom:50%;" />
+<img align="left" width="600" src="https://user-images.githubusercontent.com/17812876/99760291-424ac200-2aa8-11eb-9a25-a726a840be51.png" alt="algFramework">
 
 
 
