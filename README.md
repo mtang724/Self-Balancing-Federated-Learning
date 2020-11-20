@@ -26,6 +26,12 @@ Algorithm Framework:
 
 <img width="500" src="https://user-images.githubusercontent.com/17812876/99761162-41b32b00-2aaa-11eb-94db-a7376aa071bd.png" alt="algFramework">
 
+Workflow:
+1)Initialization: The FL server initializes the weights and the optimizer of the neural network model and collects the local data distribution of participants.
+2)Rebalancing: First, we perform the z-score-based data augmentation and downsampling to relieve the global imbalanced of training data. Then, we propose the mediator which asynchronouly receives and applies the updates from clients to averaging the local imbalance. 
+3)Training: First, each mediator sends the model to the subordinate clients. Then each client trains the model for E local epochs and returns the updated model to the corresponding mediator. Loops this process Em times. Finally, all the mediators send the updates of models to the FL server.
+4)Aggregation: The FL server aggregates all the updates using the FedAvg algorithm.
+
 **Benchmark and Dataset**:
 
 https://github.com/chaoyanghe/Awesome-Federated-Learning#Benchmark-and-Dataset
