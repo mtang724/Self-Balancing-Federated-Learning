@@ -41,6 +41,7 @@ https://github.com/chaoyanghe/Awesome-Federated-Learning#Benchmark-and-Dataset
 
 - https://github.com/ivishalanand/Federated-Learning-on-Hospital-Data
 
+- https://github.com/AshwinRJ/Federated-Learning-PyTorch
 
 ### Steps:
 - Replicate Baseline Code
