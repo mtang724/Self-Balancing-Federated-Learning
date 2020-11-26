@@ -146,6 +146,6 @@ class DataProcessor:
             self.global_train_feature.append(self.local_train_feature[i])
             self.global_train_label += self.local_train_label[i]
 
-        self.global_train_feature = np.array(self.global_train_feature)[need_idx]
-        self.global_train_label = np.array(self.global_train_label)[need_idx]
+        self.global_train_feature = np.array(self.global_train_feature)
+        self.global_train_label = np.array(self.global_train_label)
     #  endregion
