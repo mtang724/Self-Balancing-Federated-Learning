@@ -154,7 +154,7 @@ class DataProcessor:
         pass
 
     def gen_global_imbalance(self):
-        # achieve size imbalance and give value to
+        # achieve global imbalance and give value to
         # self.global_train_feature, self.global_train_label, self.local_train_feature, self.local_train_label
         pass
 
