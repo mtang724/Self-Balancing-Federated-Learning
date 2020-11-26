@@ -75,8 +75,8 @@ class DataProcessor:
 
     @staticmethod
     def get_global_difference(arr):
-        c1 = collections.Counter(arr)
-        return min(c1.values()), max(c1.values())
+        c1 = collections.Counter(arr).values()
+        return sorted(c1)
 
     @staticmethod
     def get_kl_divergence(input1, input2):
@@ -95,8 +95,8 @@ class DataProcessor:
         # separate data set by label 0 - 9
         feature_by_class = []
         for i in range(self.size_class):
-            need_idx = np.where(self.global_train_label == i)[0]
-            feature_by_class.append(self.global_train_feature[need_idx])
+            need_idx = np.where(self.train_label == i)[0]
+            feature_by_class.append(self.train_feature[need_idx])
 
         self.local_train_feature = []
         self.local_train_label = []
@@ -145,6 +145,7 @@ class DataProcessor:
         for i in range(self.size_device):
             self.global_train_feature.append(self.local_train_feature[i])
             self.global_train_label += self.local_train_label[i]
-        self.global_train_feature = np.array(self.global_train_feature)
-        self.global_train_label = np.array(self.global_train_label)
+
+        self.global_train_feature = np.array(self.global_train_feature)[need_idx]
+        self.global_train_label = np.array(self.global_train_label)[need_idx]
     #  endregion
