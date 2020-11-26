@@ -1,7 +1,6 @@
 import os
 import pickle
 import struct
-import random
 import collections
 import numpy as np
 from scipy import special as sp
@@ -148,4 +147,15 @@ class DataProcessor:
 
         self.global_train_feature = np.array(self.global_train_feature)
         self.global_train_label = np.array(self.global_train_label)
+
+    def gen_size_imbalance(self):
+        # achieve size imbalance and give value to
+        # self.global_train_feature, self.global_train_label, self.local_train_feature, self.local_train_label
+        pass
+
+    def gen_global_imbalance(self):
+        # achieve size imbalance and give value to
+        # self.global_train_feature, self.global_train_label, self.local_train_feature, self.local_train_label
+        pass
+
     #  endregion
