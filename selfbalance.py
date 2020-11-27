@@ -1,65 +1,136 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Python version: 3.6
-
-
 import numpy as np
 import math
+import random
+import imgaug as ia
+from imgaug import augmenters as iaa
 
 
-def zscore(N, labels, K, datasets):
-    """
-    The FL Server part (Algorithm 2)
-    The td and ta are the downsampling threshold and augmentation threshold
-    Set Ta = -1/Td , the recommended value of td is 3.0 or 3.5
-    The Rad is the ratio we use to control how many augmentations are generated or how many samples are retained.
-    N : Number of classes
-    K : Total number of clients
-    labels : All the data label 
-    Ydown : set of majority class
-    Yaug : set of minority class
-    datasets : K clients datasets
-    """
-    # 2 : Initialize
-    Td = 3
-    Ta = -1/Td
-    Rad = np.zeros(N)
-    # 3 : Calculate the data size of each class C
-    C = np.zeros(N)
-    for i in labels:
-        C[i] = C[i]+1
-    # 4 : Calculate the mean m and the standard deviation s of C
-    mean = np.mean(C)
-    std = np.std(C, ddof = 1)
-    # 5 : Calculate the z-score
-    z = (C-mean)/std
-    # 6-12 :
-    Ydown = set()
-    Yaug = set()
-    for y in range(0, N):
-        if z[y] < Ta:
-            Yaug.add(y)
-            Rad[y] = (std * math.sqrt(abs(z[y]/Ta)) + mean )/C[y]
-        elif z[y] > Td:
-            Ydown.add(y)
-            Rad[y] = (std * math.sqrt(z[y]*Td) + mean )/C[y]
-    # 13 : Send Yaug, Ydown, Rad to all clients =================================================== ???
-    """
-    The Clients part (Algorithm 2)
-    """
-    # 15-22 :
-    for k in range(0, K):
-        for (x,y) in datasets[k]: # 具体改一下
-            if y in Ydown:
-                Downsample(x, y, Rad[y])
-            elif y in Yaug:
-                Augment(x, y, Rad[y]-1)
-        datasets[k].add() # 加 augment k 入 client k 的数据集
-        ShuffleDataset(k) # 随机数据集，感觉没必要，可以提取的时候用随机idx
+class DataBalance:
+    def __init__(self, dp):
+        self.dp = dp
+        self.td = 3
+        self.ta = -3
 
-def Downsample(): # 加上
+    def z_score(self):
+        """
+        The FL Server part (Algorithm 2)
+        The td and ta are the downsampling threshold and augmentation threshold
+        Set Ta = -1/Td , the recommended value of td is 3.0 or 3.5
+        The Rad is the ratio we use to control how many augmentations are generated or how many samples are retained.
+        N : Number of classes
+        K : Total number of clients
+        labels : All the data label
+        Ydown : set of majority class
+        Yaug : set of minority class
+        datasets : K clients datasets
+        """
+        # 2 : Initialize
+        r_ad = np.zeros(self.dp.size_class)
 
-def Augment(): # 加上
+        # 3 : Calculate the data size of each class C
+        num_each_class = np.zeros(self.dp.size_class)
+        for i in self.dp.global_train_label:
+            num_each_class[i] = num_each_class[i] + 1
+
+        # 4 : Calculate the mean m and the standard deviation s of C
+        mean = np.mean(num_each_class)
+        std = np.std(num_each_class, ddof=1)
+        # 5 : Calculate the z-score
+        z = (num_each_class- mean) / std
+        # 6-12 :
+        y_down = set()
+        y_aug = set()
+        for y in range(self.dp.size_class):
+            if z[y] < self.ta:
+                y_aug.add(y)
+                r_ad[y] = (-std * math.sqrt(z[y] * self.ta) + mean) / num_each_class[y]
+            elif z[y] > self.td:
+                y_down.add(y)
+                r_ad[y] = (std * math.sqrt(z[y] * self.td) + mean) / num_each_class[y]
+
+        # 13 : Send Yaug, Ydown, Rad to all clients ===================================================
+        """
+        The Clients part (Algorithm 2)
+        """
+        # 15-22 :
+        for k in range(self.dp.size_device):
+            new_feature_array = np.empty([0, self.dp.size_feature])
+            new_label = []
+            for i in range(len(self.dp.local_train_feature[k])):
+                x, y = self.dp.local_train_feature[k][i], self.dp.local_train_label[k][i]
+                new_x, new_y = x, y
+                if y in y_down:
+                    new_x, new_y = self.down_sample(x, y, r_ad[y])
+                elif y in y_aug:
+                    aug_x, aug_y = self.augment(x, y, r_ad[y]-1)
+                    if aug_x:
+                        new_feature_array = np.vstack([new_feature_array, aug_x])
+                        new_label.append(aug_y)
+                if new_x:
+                    new_feature_array = np.vstack([new_feature_array, new_x])
+                    new_label.append(new_y)
+            self.dp.local_train_feature[k] = new_feature_array
+            self.dp.local_train_label[k] = new_label
+
+    @staticmethod
+    def down_sample(x, y, r_ad):
+        if random.random() < r_ad:
+            return x, y
+        else:
+            return None, None
+
+    def augment(self, x, y, r_ad):
+        if random.random() > r_ad:
+            return None, None
+        else:
+            image = None
+            if self.dp.data_source == 'cifar':
+                image = x.reshape(32, 32, 3)
+            elif self.dp.data_source == 'mnist':
+                image = x.reshape(28, 28)
+
+            rand_select = random.random()
+
+            image_aug = None
+            if rand_select < 0.25:
+                image_aug = self.rotate(image)
+            elif rand_select < 0.5:
+                image_aug = self.shear(image)
+            elif rand_select < 0.75:
+                image_aug = self.scale(image)
+            elif rand_select < 1:
+                image_aug = self.shift(image)
+            return image_aug.reshape(-1), y
+
+    @staticmethod
+    def rotate(image):
+        rotate = iaa.Affine(rotate=(-25, 25))
+        image_aug = rotate(image=image)
+        return image_aug
+
+    @staticmethod
+    def shear(image):
+        aug_x = iaa.ShearX((-25, 25))
+        aug_y = iaa.ShearY((-25, 25))
+        image_aug = aug_x(image=image)
+        image_aug = aug_y(image=image_aug)
+        return image_aug
+
+    @staticmethod
+    def scale(image):
+        aug1 = iaa.ScaleX((0.5, 1.5))
+        aug2 = iaa.ScaleY((0.5, 1.5))
+        image_aug = aug1(image=image)
+        image_aug = aug2(image=image_aug)
+        return image_aug
+
+    @staticmethod
+    def shift(image):
+        aug1 = iaa.TranslateX(percent=(-0.1, 0.1))
+        aug2 = iaa.TranslateY(percent=(-0.1, 0.1))
+        image_aug = aug1(image=image)
+        image_aug = aug2(image=image_aug)
+        return image_aug
 
 
 if __name__ == '__main__':
