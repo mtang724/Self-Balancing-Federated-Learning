@@ -22,9 +22,13 @@ class DataProcessor:
 
         self.size_class = None
         self.size_device = None
+        self.size_feature = None
+
+        self.data_source = None
 
     # region data storage
     def get_input(self, name):
+        self.data_source = name
         if name == 'cifar':
             dimension_size = 3072
             self.train_feature = np.empty((0, dimension_size))
@@ -33,7 +37,8 @@ class DataProcessor:
                     dic = pickle.load(fo, encoding='bytes')
                 self.train_feature = np.vstack((self.train_feature, dic[b'data']))
                 self.train_label = np.hstack((self.train_label, np.array(dic[b'labels'])))
-
+            self.train_feature = self.train_feature.reshape(len(self.train_feature), 3, 32, 32).transpose(0, 2, 3, 1)
+            self.train_feature = self.train_feature.reshape(len(self.train_feature), -1)
             with open('./data/cifar/test_batch', 'rb') as fo:
                 dic = pickle.load(fo, encoding='bytes')
             self.test_feature = dic[b'data']
@@ -56,6 +61,7 @@ class DataProcessor:
             self.train_feature, self.train_label = load_mnist('./data/mnist', 'train')
             self.test_feature, self.test_label = load_mnist('./data/mnist', 't10k')
         self.size_class = len(set(self.train_label) | set(self.test_label))
+        self.size_feature = self.train_feature.shape[1]
     # endregion
 
     # region imbalance evaluation
