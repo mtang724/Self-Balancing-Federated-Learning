@@ -17,16 +17,17 @@ class DataBalance:
         client_pool = set([i for i in range(self.dp.size_device)])
         while client_pool:
             new_mediator = set()
-            mediator_label_pool = []
+            mediator_label_pool = np.array([])
             while client_pool and len(new_mediator) < self.gamma:
                 select_client, kl_score = None, float('inf')
                 for client in client_pool:
                     new_kl_score = self.dp.get_kl_divergence(self.dp.global_train_label,
-                                                             mediator_label_pool + self.dp.local_train_label[client])
+                                                             np.hstack([mediator_label_pool,
+                                                                        self.dp.local_train_label[client]]))
                     if new_kl_score < kl_score:
                         select_client = client
                 new_mediator.add(select_client)
-                mediator_label_pool += self.dp.local_train_label[select_client]
+                mediator_label_pool = np.hstack([mediator_label_pool, self.dp.local_train_label[select_client]])
                 client_pool.remove(select_client)
             self.mediator.append(new_mediator)
 
@@ -94,7 +95,7 @@ class DataBalance:
                     new_feature_array = np.vstack([new_feature_array, new_x])
                     new_label.append(new_y)
             self.dp.local_train_feature[k] = new_feature_array
-            self.dp.local_train_label[k] = new_label
+            self.dp.local_train_label[k] = np.array(new_label)
         self.dp.refresh_global_data()
 
     @staticmethod

@@ -32,19 +32,19 @@ class DataProcessor:
         self.data_source = name
         if name == 'cifar':
             dimension_size = 3072
-            self.train_feature = np.empty((0, dimension_size))
-            self.train_label = np.array([])
+            self.train_feature = np.empty((0, dimension_size), dtype=np.int)
+            self.train_label = np.array([], dtype=np.int)
             for i in range(1, 6):
                 with open('./data/cifar/data_batch_{}'.format(i), 'rb') as fo:
                     dic = pickle.load(fo, encoding='bytes')
                 self.train_feature = np.vstack((self.train_feature, dic[b'data']))
-                self.train_label = np.hstack((self.train_label, np.array(dic[b'labels'])))
+                self.train_label = np.hstack((self.train_label, np.array(dic[b'labels'], dtype=np.int)))
             self.train_feature = self.train_feature.reshape(len(self.train_feature), 3, 32, 32).transpose(0, 2, 3, 1)
             self.train_feature = self.train_feature.reshape(len(self.train_feature), -1)
             with open('./data/cifar/test_batch', 'rb') as fo:
                 dic = pickle.load(fo, encoding='bytes')
             self.test_feature = dic[b'data']
-            self.test_label = np.array(dic[b'labels'])
+            self.test_label = np.array(dic[b'labels'], dtype=np.int)
 
         elif name == 'mnist':
             def load_mnist(path, kind='train'):
@@ -75,8 +75,9 @@ class DataProcessor:
 
     # region imbalance evaluation
     @staticmethod
-    def get_size_difference(a, b):
-        print("size difference: {} and {}".format(len(a), len(b)))
+    def get_size_difference(arr):
+        for i, a in enumerate(arr):
+            print('the {}th device size: {}'.format(i, len(a)))
 
     # arr shape: (number of cluster, number of data for each cluster)
     def get_local_difference(self, arr):
@@ -130,7 +131,7 @@ class DataProcessor:
                 step += 1
                 select_idx = need_idx[step*remain_size:(step+1)*remain_size]
                 self.local_train_feature.append(feature_by_class[i][select_idx])
-                self.local_train_label.append([i for _ in range(remain_size)])
+                self.local_train_label.append(np.repeat(i, remain_size))
 
             # put the data that not selected into the sample pool
             select_idx = need_idx[(step + 1) * remain_size:]
@@ -151,28 +152,33 @@ class DataProcessor:
                 self.local_train_feature[i] = np.vstack([self.local_train_feature[i], sample_feature_pool[select_idx]])
             else:
                 self.local_train_feature[i] = sample_feature_pool[select_idx]
-            self.local_train_label[i] += sample_label_pool[select_idx].tolist()
+            self.local_train_label[i] = np.hstack([self.local_train_label[i], sample_label_pool[select_idx]])
         self.refresh_global_data()
 
-    def refresh_global_data(self):
-        # initialize global train features and labels
-        self.global_train_feature = []
-        self.global_train_label = []
-        for i in range(self.size_device):
-            self.global_train_feature.append(self.local_train_feature[i])
-            self.global_train_label += self.local_train_label[i]
+    def gen_size_imbalance(self, list_size):
+        self.size_device = len(list_size)
+        self.local_train_feature = []
+        self.local_train_label = []
 
-        self.global_train_feature = np.array(self.global_train_feature)
-        self.global_train_label = np.array(self.global_train_label)
-
-    def gen_size_imbalance(self):
-        # achieve size imbalance and give value to
-        # self.global_train_feature, self.global_train_label, self.local_train_feature, self.local_train_label
-        pass
+        need_idx = np.arange(len(self.train_feature))
+        np.random.shuffle(need_idx)
+        cur_idx = 0
+        for s in list_size:
+            self.local_train_feature.append(self.train_feature[cur_idx:cur_idx+s])
+            self.local_train_label.append(self.train_label[cur_idx:cur_idx+s])
+            cur_idx += s
+        self.refresh_global_data()
 
     def gen_global_imbalance(self):
         # achieve global imbalance and give value to
         # self.global_train_feature, self.global_train_label, self.local_train_feature, self.local_train_label
         pass
 
+    def refresh_global_data(self):
+        # initialize global train features and labels
+        self.global_train_feature = np.empty((0, self.size_feature), dtype=np.int)
+        self.global_train_label = np.array([], dtype=np.int)
+        for i in range(self.size_device):
+            self.global_train_feature = np.vstack([self.global_train_feature, self.local_train_feature[i]])
+            self.global_train_label = np.hstack([self.global_train_label, self.local_train_label[i]])
     #  endregion
