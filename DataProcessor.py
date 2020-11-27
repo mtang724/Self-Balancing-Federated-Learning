@@ -28,10 +28,12 @@ class DataProcessor:
 
     # region data storage
     def get_input(self, name):
+        self.__init__()
         self.data_source = name
         if name == 'cifar':
             dimension_size = 3072
             self.train_feature = np.empty((0, dimension_size))
+            self.train_label = np.array([])
             for i in range(1, 6):
                 with open('./data/cifar/data_batch_{}'.format(i), 'rb') as fo:
                     dic = pickle.load(fo, encoding='bytes')
@@ -60,8 +62,15 @@ class DataProcessor:
 
             self.train_feature, self.train_label = load_mnist('./data/mnist', 'train')
             self.test_feature, self.test_label = load_mnist('./data/mnist', 't10k')
+
         self.size_class = len(set(self.train_label) | set(self.test_label))
         self.size_feature = self.train_feature.shape[1]
+
+        self.train_feature = self.train_feature.astype(int)
+        self.train_label = self.train_label.astype(int)
+        self.test_feature = self.test_feature.astype(int)
+        self.test_label = self.test_label.astype(int)
+
     # endregion
 
     # region imbalance evaluation
@@ -109,8 +118,8 @@ class DataProcessor:
         remain_size = int(device_size * alpha)
         sample_size = device_size - remain_size
 
-        sample_feature_pool = np.array([])
-        sample_label_pool = np.array([])
+        sample_feature_pool = np.array([], dtype=np.int)
+        sample_label_pool = np.array([], dtype=np.int)
 
         # keep the proportion of alpha of the original data in the specific class
         for i in range(self.size_class):
@@ -129,7 +138,7 @@ class DataProcessor:
                 sample_feature_pool = np.vstack([sample_feature_pool, feature_by_class[i][select_idx]])
             else:
                 sample_feature_pool = feature_by_class[i][select_idx]
-            sample_label_pool = np.hstack([sample_label_pool, [i for _ in range(len(select_idx))]])
+            sample_label_pool = np.hstack([sample_label_pool, np.repeat(i, len(select_idx))])
 
         # add the data from the sample pool to each device
         need_idx = np.arange(len(sample_feature_pool))
@@ -143,7 +152,9 @@ class DataProcessor:
             else:
                 self.local_train_feature[i] = sample_feature_pool[select_idx]
             self.local_train_label[i] += sample_label_pool[select_idx].tolist()
+        self.refresh_global_data()
 
+    def refresh_global_data(self):
         # initialize global train features and labels
         self.global_train_feature = []
         self.global_train_label = []

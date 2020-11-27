@@ -6,13 +6,14 @@ from imgaug import augmenters as iaa
 
 class DataBalance:
     def __init__(self, dp):
-        self.dp = dp
+        self.dp = dp  # a variable of class DataProcessor
         self.td = 3
         self.ta = -3
         self.mediator = []
         self.gamma = 3  # the maximum number for a mediator can communicate
 
     def assign_clients(self):
+        # assign the devices to each mediator using greedy algorithm
         client_pool = set([i for i in range(self.dp.size_device)])
         while client_pool:
             new_mediator = set()
@@ -53,6 +54,8 @@ class DataBalance:
         # 4 : Calculate the mean m and the standard deviation s of C
         mean = np.mean(num_each_class)
         std = np.std(num_each_class, ddof=1)
+        if std == 0:
+            return
         # 5 : Calculate the z-score
         z = (num_each_class- mean) / std
         # 6-12 :
@@ -72,23 +75,27 @@ class DataBalance:
         """
         # 15-22 :
         for k in range(self.dp.size_device):
+            print('size: {}'.format(k))
             new_feature_array = np.empty([0, self.dp.size_feature])
             new_label = []
             for i in range(len(self.dp.local_train_feature[k])):
+                if i % 1000 == 0:
+                    print('the {}th feature'.format(i))
                 x, y = self.dp.local_train_feature[k][i], self.dp.local_train_label[k][i]
                 new_x, new_y = x, y
                 if y in y_down:
                     new_x, new_y = self.down_sample(x, y, r_ad[y])
                 elif y in y_aug:
                     aug_x, aug_y = self.augment(x, y, r_ad[y]-1)
-                    if aug_x:
+                    if aug_x is not None:
                         new_feature_array = np.vstack([new_feature_array, aug_x])
                         new_label.append(aug_y)
-                if new_x:
+                if new_x is not None:
                     new_feature_array = np.vstack([new_feature_array, new_x])
                     new_label.append(new_y)
             self.dp.local_train_feature[k] = new_feature_array
             self.dp.local_train_label[k] = new_label
+        self.dp.refresh_global_data()
 
     @staticmethod
     def down_sample(x, y, r_ad):
@@ -109,6 +116,7 @@ class DataBalance:
 
             rand_select = random.random()
             image_aug = None
+            # augment the new image
             if rand_select < 0.25:
                 image_aug = self.rotate(image)
             elif rand_select < 0.5:
@@ -121,12 +129,14 @@ class DataBalance:
 
     @staticmethod
     def rotate(image):
+        # rotate image randomly in -25 - 25 degree
         rotate = iaa.Affine(rotate=(-25, 25))
         image_aug = rotate(image=image)
         return image_aug
 
     @staticmethod
     def shear(image):
+        # shear image randomly between -25 and 25 degree
         aug_x = iaa.ShearX((-25, 25))
         aug_y = iaa.ShearY((-25, 25))
         image_aug = aug_x(image=image)
@@ -135,6 +145,7 @@ class DataBalance:
 
     @staticmethod
     def scale(image):
+        # scale image randomly between 0.5 and 1.5
         aug1 = iaa.ScaleX((0.5, 1.5))
         aug2 = iaa.ScaleY((0.5, 1.5))
         image_aug = aug1(image=image)
@@ -143,6 +154,7 @@ class DataBalance:
 
     @staticmethod
     def shift(image):
+        # shift image randomly 10 percent
         aug1 = iaa.TranslateX(percent=(-0.1, 0.1))
         aug2 = iaa.TranslateY(percent=(-0.1, 0.1))
         image_aug = aug1(image=image)
