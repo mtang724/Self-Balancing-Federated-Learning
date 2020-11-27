@@ -10,6 +10,25 @@ class DataBalance:
         self.dp = dp
         self.td = 3
         self.ta = -3
+        self.mediator = []
+        self.gamma = 3  # the maximum number for a mediator can communicate
+
+    def assign_clients(self):
+        client_pool = set([i for i in range(self.dp.size_device)])
+        while client_pool:
+            new_mediator = set()
+            mediator_label_pool = []
+            while client_pool and len(new_mediator) < self.gamma:
+                select_client, kl_score = None, float('inf')
+                for client in client_pool:
+                    new_kl_score = self.dp.get_kl_divergence(self.dp.global_train_label,
+                                                             mediator_label_pool + self.dp.local_train_label[client])
+                    if new_kl_score < kl_score:
+                        select_client = client
+                new_mediator.add(select_client)
+                mediator_label_pool += self.dp.local_train_label[select_client]
+                client_pool.remove(select_client)
+            self.mediator.append(new_mediator)
 
     def z_score(self):
         """
@@ -90,7 +109,6 @@ class DataBalance:
                 image = x.reshape(28, 28)
 
             rand_select = random.random()
-
             image_aug = None
             if rand_select < 0.25:
                 image_aug = self.rotate(image)
