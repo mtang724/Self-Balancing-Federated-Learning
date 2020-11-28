@@ -88,10 +88,9 @@ class DataProcessor:
                 res[i][j] = self.get_kl_divergence(arr[i], arr[j])
         return res
 
-    @staticmethod
-    def get_global_difference(arr):
+    def get_global_difference(self, arr):
         c1 = collections.Counter(arr).values()
-        return sorted(c1)
+        return [0] * (self.size_class - len(c1)) + sorted(c1)
 
     @staticmethod
     def get_kl_divergence(input1, input2):
@@ -105,16 +104,20 @@ class DataProcessor:
 
     # region generate imbalance data set
     def gen_local_imbalance(self, num_device, device_size, alpha):
+        # num_device indicates the number of the devices
+        # device_size is the size of each device(it's an integer, not a list, as each device should have the same size)
+        # alpha is the ratio to control KL.
+        # Alpha = 0 means full random sampling, no imbalance
+        # Alpha = 1 means no sampling, each device takes only one class
         self.size_device = num_device
+        self.local_train_feature = []
+        self.local_train_label = []
 
         # separate data set by label 0 - 9
         feature_by_class = []
         for i in range(self.size_class):
             need_idx = np.where(self.train_label == i)[0]
             feature_by_class.append(self.train_feature[need_idx])
-
-        self.local_train_feature = []
-        self.local_train_label = []
 
         remain_size = int(device_size * alpha)
         sample_size = device_size - remain_size
@@ -156,6 +159,8 @@ class DataProcessor:
         self.refresh_global_data()
 
     def gen_size_imbalance(self, list_size):
+        # generate size imbalance
+        # list_size is a size indicates the size of each device
         self.size_device = len(list_size)
         self.local_train_feature = []
         self.local_train_label = []
@@ -169,10 +174,41 @@ class DataProcessor:
             cur_idx += s
         self.refresh_global_data()
 
-    def gen_global_imbalance(self):
-        # achieve global imbalance and give value to
-        # self.global_train_feature, self.global_train_label, self.local_train_feature, self.local_train_label
-        pass
+    def gen_global_imbalance(self, num_device, device_size, num_each_class):
+        # generate global imbalance
+        # num_device indicates the number of the devices
+        # device_size is the size of each device(it's an integer, not a list, as each device should have the same size)
+        # num_each_class is a list indicating the number for each class
+        self.size_device = num_device
+        self.local_train_feature = []
+        self.local_train_label = []
+
+        feature_by_class = []
+        for i in range(self.size_class):
+            need_idx = np.where(self.train_label == i)[0]
+            feature_by_class.append(self.train_feature[need_idx])
+        sample_feature_pool = np.array([], dtype=np.int)
+        sample_label_pool = np.array([], dtype=np.int)
+
+        for i in range(self.size_class):
+            need_idx = np.arange(len(feature_by_class[i]))
+            np.random.shuffle(need_idx)
+            if sample_feature_pool.size:
+                sample_feature_pool = np.vstack([sample_feature_pool,
+                                                 feature_by_class[i][need_idx[:num_each_class[i]]]])
+            else:
+                sample_feature_pool = feature_by_class[i][need_idx[:num_each_class[i]]]
+            sample_label_pool = np.hstack([sample_label_pool, np.repeat(i, num_each_class[i])])
+
+        need_idx = np.arange(len(sample_feature_pool))
+        np.random.shuffle(need_idx)
+        step = -1
+        for i in range(self.size_device):
+            step += 1
+            select_idx = need_idx[step*device_size:(step+1)*device_size]
+            self.local_train_feature.append(sample_feature_pool[select_idx])
+            self.local_train_label.append(sample_label_pool[select_idx])
+        self.refresh_global_data()
 
     def refresh_global_data(self):
         # initialize global train features and labels
