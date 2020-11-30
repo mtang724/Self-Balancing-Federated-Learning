@@ -90,20 +90,23 @@ if __name__ == '__main__':
     if args.all_clients: 
         print("Aggregation over all clients")
         w_locals = [w_glob for i in range(args.num_users)]
+    # 3 : for each synchronization round r=1; 2; . . . ; R do
     for iter in range(args.epochs):
-        loss_locals = []
-        if not args.all_clients:
-            w_locals = []
-        m = max(int(args.frac * args.num_users), 1)
-        idxs_users = np.random.choice(range(args.num_users), m, replace=False)
-        for idx in idxs_users:
-            local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[idx])
-            w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device))
-            if args.all_clients:
-                w_locals[idx] = copy.deepcopy(w)
-            else:
-                w_locals.append(copy.deepcopy(w))
-            loss_locals.append(copy.deepcopy(loss))
+        # 4 : for each mediator m in 1; 2; . . . ; M parallelly do
+        for mdt in db.mediator: 
+            # 5- :
+            loss_locals = []
+            if not args.all_clients:
+                w_locals = []
+            for client in mdt:
+                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[client])
+                w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device)) # for lEpoch in range(E): 在local.train完成
+                if args.all_clients:
+                    w_locals[client] = copy.deepcopy(w)
+                else:
+                    w_locals.append(copy.deepcopy(w))
+                loss_locals.append(copy.deepcopy(loss))
+        
         # update global weights
         w_glob = FedAvg(w_locals)
 
