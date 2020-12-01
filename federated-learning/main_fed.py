@@ -29,6 +29,7 @@ if __name__ == '__main__':
     db = DataBalance.DataBalance(dp)
 
     # load dataset and split users
+    '''
     if args.dataset == 'mnist':
         trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
         dataset_train = datasets.MNIST('../data/mnist/', train=True, download=True, transform=trans_mnist)
@@ -48,7 +49,8 @@ if __name__ == '__main__':
             exit('Error: only consider IID setting in CIFAR10')
     else:
         exit('Error: unrecognized dataset')
-    img_size = dataset_train[0][0].shape
+    '''
+    img_size = dp[0][0].shape
 
     # build model
     net_glob = None
@@ -94,7 +96,7 @@ if __name__ == '__main__':
             if not args.all_clients:
                 w_locals = []
             for client in mdt:
-                local = LocalUpdate(args=args, dataset=dataset_train, idxs=dict_users[client])
+                local = LocalUpdate(args=args, dataset=dp, idxs=dict_users[client])
                 w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device)) # for lEpoch in range(E): 在local.train完成
                 if args.all_clients:
                     w_locals[client] = copy.deepcopy(w)
@@ -121,8 +123,8 @@ if __name__ == '__main__':
 
     # testing
     net_glob.eval()
-    acc_train, loss_train = test_img(net_glob, dataset_train, args)
-    acc_test, loss_test = test_img(net_glob, dataset_test, args)
+    acc_train, loss_train = test_img(net_glob, dp, args)
+    acc_test, loss_test = test_img(net_glob, dp, args)
     print("Training accuracy: {:.2f}".format(acc_train))
     print("Testing accuracy: {:.2f}".format(acc_test))
 

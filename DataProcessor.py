@@ -3,6 +3,8 @@ import pickle
 import struct
 import collections
 import numpy as np
+import torch
+from torchvision import transforms
 from scipy import special as sp
 
 
@@ -24,7 +26,25 @@ class DataProcessor:
         self.size_device = None
         self.size_feature = None
 
+        self.transform = None
+
+        self.type = 'train'
         self.data_source = None
+
+    def __len__(self):
+        return len(self.global_train_label)
+
+    def __getitem__(self, idx):
+        if self.type == 'train':
+            feature, label = self.global_train_feature[idx], self.global_train_label[idx]
+        else:
+            feature, label = self.test_feature[idx], self.test_label[idx]
+        if self.data_source == "cifar":
+            feature = feature.reshape(32, 32, 3)
+        elif self.data_source == "mnist":
+            feature = feature.reshape(28, 28, 1)
+        img = self.transform(feature)
+        return img, label
 
     # region data storage
     def get_input(self, name):
@@ -45,6 +65,11 @@ class DataProcessor:
                 dic = pickle.load(fo, encoding='bytes')
             self.test_feature = dic[b'data']
             self.test_label = np.array(dic[b'labels'], dtype=np.int)
+            self.transform = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+            ])
 
         elif name == 'mnist':
             def load_mnist(path, kind='train'):
@@ -62,6 +87,11 @@ class DataProcessor:
 
             self.train_feature, self.train_label = load_mnist('./data/mnist', 'train')
             self.test_feature, self.test_label = load_mnist('./data/mnist', 't10k')
+            self.transform = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.ToTensor(),
+                transforms.Normalize((0.1307,), (0.3081,))
+            ])
 
         self.size_class = len(set(self.train_label) | set(self.test_label))
         self.size_feature = self.train_feature.shape[1]
