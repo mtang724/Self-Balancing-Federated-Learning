@@ -1,27 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Python version: 3.6
-
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import copy
 import numpy as np
 from torchvision import datasets, transforms
 import torch
 
-from utils.sampling import mnist_iid, mnist_noniid, cifar_iid
-from utils.options import args_parser
-from models.Update import LocalUpdate
-from models.Nets import MLP, CNNMnist, CNNCifar
-from models.Fed import FedAvg
-from models.test import test_img
+from .utils.sampling import mnist_iid, mnist_noniid, cifar_iid
+from .utils.options import args_parser
+from .models.Update import LocalUpdate
+from .models.Nets import MLP, CNNMnist, CNNCifar
+from .models.Fed import FedAvg
+from .models.test import test_img
 
-import sys 
-sys.path.append("..") 
-import DataBalance ## Import self-balanced algo
+import DataBalance  # Import self-balanced algo
 import DataProcessor
 
+matplotlib.use('Agg')
 
 
 if __name__ == '__main__':
@@ -57,6 +51,7 @@ if __name__ == '__main__':
     img_size = dataset_train[0][0].shape
 
     # build model
+    net_glob = None
     if args.model == 'cnn' and args.dataset == 'cifar':
         net_glob = CNNCifar(args=args).to(args.device)
     elif args.model == 'cnn' and args.dataset == 'mnist':
