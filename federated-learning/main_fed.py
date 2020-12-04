@@ -128,6 +128,7 @@ if __name__ == '__main__':
     # testing
     net_glob.eval()
     acc_train, loss_train = test_img(net_glob, dp, args)
+    dp.type = 'test'
     acc_test, loss_test = test_img(net_glob, dp, args)
     print("Training accuracy: {:.2f}".format(acc_train))
     print("Testing accuracy: {:.2f}".format(acc_test))
