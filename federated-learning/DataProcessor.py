@@ -37,13 +37,13 @@ class DataProcessor:
 
     def __getitem__(self, idx):
         if self.type == 'train':
-            feature, label = self.global_train_feature[idx], self.global_train_label[idx]
+            feature, label = self.train_feature[idx], self.train_label[idx]
         else:
             feature, label = self.test_feature[idx], self.test_label[idx]
         if self.data_source == "cifar":
-            feature = feature.reshape(32, 32, 3)
+            feature = feature.reshape(32, 32, 3).astype(np.float32)
         elif self.data_source == "mnist":
-            feature = feature.reshape(28, 28, 1)
+            feature = feature.reshape(28, 28, 1).astype(np.float32)
         img = self.transform(feature)
         return img, label
 

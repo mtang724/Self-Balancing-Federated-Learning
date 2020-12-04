@@ -5,12 +5,12 @@ import numpy as np
 from torchvision import datasets, transforms
 import torch
 
-from .utils.sampling import mnist_iid, mnist_noniid, cifar_iid
-from .utils.options import args_parser
-from .models.Update import LocalUpdate
-from .models.Nets import MLP, CNNMnist, CNNCifar
-from .models.Fed import FedAvg
-from .models.test import test_img
+from utils.sampling import mnist_iid, mnist_noniid, cifar_iid
+from utils.options import args_parser
+from models.Update import LocalUpdate
+from models.Nets import MLP, CNNMnist, CNNCifar
+from models.Fed import FedAvg
+from models.test import test_img
 
 import DataBalance  # Import self-balanced algo
 import DataProcessor
@@ -27,6 +27,10 @@ if __name__ == '__main__':
     dp.size_device = 4
     dp.local_train_label = ",,," # change the parameters
     db = DataBalance.DataBalance(dp)
+
+    dp.get_input('mnist')
+    dp.gen_size_imbalance([5000, 2000, 1000])
+    
 
     # load dataset and split users
     '''
@@ -82,7 +86,7 @@ if __name__ == '__main__':
     # originally assign clients and Fed Avg -> mediator Fed Avg
     ##########################################################
     db.assign_clients()
-    print (db.mediator)
+    #print (db.mediator)
     ##########################################################
     if args.all_clients: 
         print("Aggregation over all clients")
@@ -96,7 +100,7 @@ if __name__ == '__main__':
             if not args.all_clients:
                 w_locals = []
             for client in mdt:
-                local = LocalUpdate(args=args, dataset=dp, idxs=dict_users[client])
+                local = LocalUpdate(args=args, dataset=dp, idxs=dp.local_train_index[client])
                 w, loss = local.train(net=copy.deepcopy(net_glob).to(args.device)) # for lEpoch in range(E): 在local.train完成
                 if args.all_clients:
                     w_locals[client] = copy.deepcopy(w)
