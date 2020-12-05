@@ -7,13 +7,16 @@ from imgaug import augmenters as iaa
 class DataBalance:
     def __init__(self, dp):
         self.dp = dp  # a variable of class DataProcessor
-        self.td = 3
-        self.ta = -3
+        self.td = 0.1
+        self.ta = -0.1
         self.mediator = []
         self.gamma = 3  # the maximum number for a mediator can communicate
 
-    def assign_clients(self):
+    def assign_clients(self, balance=True):
         # assign the devices to each mediator using greedy algorithm
+        if not balance:
+            self.mediator = [{i} for i in range(self.dp.size_device)]
+            return
         client_pool = set([i for i in range(self.dp.size_device)])
         while client_pool:
             new_mediator = set()

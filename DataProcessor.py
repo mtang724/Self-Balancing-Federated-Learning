@@ -143,14 +143,11 @@ class DataProcessor:
         self.size_device = num_device
         self.local_train_feature = []
         self.local_train_label = []
-        self.local_train_index = []
 
         # separate data set by label 0 - 9
         feature_by_class = []
-        feature_index = []
         for i in range(self.size_class):
             need_idx = np.where(self.train_label == i)[0]
-            feature_index.append(need_idx)
             feature_by_class.append(self.train_feature[need_idx])
 
         remain_size = int(device_size * alpha)
@@ -158,7 +155,6 @@ class DataProcessor:
 
         sample_feature_pool = np.array([], dtype=np.int)
         sample_label_pool = np.array([], dtype=np.int)
-        sample_index = np.array([], dtype=np.int)
 
         # keep the proportion of alpha of the original data in the specific class
         for i in range(self.size_class):
@@ -168,7 +164,6 @@ class DataProcessor:
             for j in range(i, self.size_device, self.size_class):
                 step += 1
                 select_idx = need_idx[step*remain_size:(step+1)*remain_size]
-                self.local_train_index.append(feature_index[i][select_idx])
                 self.local_train_feature.append(feature_by_class[i][select_idx])
                 self.local_train_label.append(np.repeat(i, remain_size))
 
@@ -176,10 +171,8 @@ class DataProcessor:
             select_idx = need_idx[(step + 1) * remain_size:]
             if sample_feature_pool.size:
                 sample_feature_pool = np.vstack([sample_feature_pool, feature_by_class[i][select_idx]])
-                sample_index = np.hstack([sample_index, feature_index[i][select_idx]])
             else:
                 sample_feature_pool = feature_by_class[i][select_idx]
-                sample_index = feature_index[i][select_idx]
             sample_label_pool = np.hstack([sample_label_pool, np.repeat(i, len(select_idx))])
 
         # add the data from the sample pool to each device
@@ -191,10 +184,8 @@ class DataProcessor:
             select_idx = need_idx[step*sample_size:(step+1)*sample_size]
             if self.local_train_feature[i].size:
                 self.local_train_feature[i] = np.vstack([self.local_train_feature[i], sample_feature_pool[select_idx]])
-                self.local_train_index[i] = np.hstack([self.local_train_index[i], sample_index[select_idx]])
             else:
                 self.local_train_feature[i] = sample_feature_pool[select_idx]
-                self.local_train_index[i] = sample_index[select_idx]
             self.local_train_label[i] = np.hstack([self.local_train_label[i], sample_label_pool[select_idx]])
         self.refresh_global_data()
 
@@ -204,14 +195,12 @@ class DataProcessor:
         self.size_device = len(list_size)
         self.local_train_feature = []
         self.local_train_label = []
-        self.local_train_index = []
 
         need_idx = np.arange(len(self.train_feature))
         np.random.shuffle(need_idx)
         cur_idx = 0
         for s in list_size:
             self.local_train_feature.append(self.train_feature[need_idx[cur_idx:cur_idx+s]])
-            self.local_train_index.append(need_idx[cur_idx:cur_idx+s])
             self.local_train_label.append(self.train_label[need_idx[cur_idx:cur_idx+s]])
             cur_idx += s
         self.refresh_global_data()
@@ -224,17 +213,13 @@ class DataProcessor:
         self.size_device = num_device
         self.local_train_feature = []
         self.local_train_label = []
-        self.local_train_index = []
 
         feature_by_class = []
-        feature_index = []
         for i in range(self.size_class):
             need_idx = np.where(self.train_label == i)[0]
-            feature_index.append(need_idx)
             feature_by_class.append(self.train_feature[need_idx])
         sample_feature_pool = np.array([], dtype=np.int)
         sample_label_pool = np.array([], dtype=np.int)
-        sample_index = np.array([], dtype=np.int)
 
         for i in range(self.size_class):
             need_idx = np.arange(len(feature_by_class[i]))
@@ -242,10 +227,8 @@ class DataProcessor:
             if sample_feature_pool.size:
                 sample_feature_pool = np.vstack([sample_feature_pool,
                                                  feature_by_class[i][need_idx[:num_each_class[i]]]])
-                sample_index = np.hstack([sample_index, feature_index[i][need_idx[:num_each_class[i]]]])
             else:
                 sample_feature_pool = feature_by_class[i][need_idx[:num_each_class[i]]]
-                sample_index = feature_index[i][need_idx[:num_each_class[i]]]
             sample_label_pool = np.hstack([sample_label_pool, np.repeat(i, num_each_class[i])])
 
         need_idx = np.arange(len(sample_feature_pool))
@@ -255,7 +238,6 @@ class DataProcessor:
             step += 1
             select_idx = need_idx[step*device_size:(step+1)*device_size]
             self.local_train_feature.append(sample_feature_pool[select_idx])
-            self.local_train_index.append(sample_index[select_idx])
             self.local_train_label.append(sample_label_pool[select_idx])
         self.refresh_global_data()
 
@@ -263,7 +245,9 @@ class DataProcessor:
         # initialize global train features and labels
         self.global_train_feature = np.empty((0, self.size_feature), dtype=np.int)
         self.global_train_label = np.array([], dtype=np.int)
+        idx_start = 0
         for i in range(self.size_device):
             self.global_train_feature = np.vstack([self.global_train_feature, self.local_train_feature[i]])
             self.global_train_label = np.hstack([self.global_train_label, self.local_train_label[i]])
+            self.local_train_index.append(np.arange(idx_start, idx_start+len(self.local_train_label[i])))
     #  endregion

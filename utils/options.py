@@ -6,6 +6,7 @@ import argparse
 
 def args_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--balance", action='store_true', help='whether we balance the dataset')
     # federated arguments
     parser.add_argument('--epochs', type=int, default=10, help="rounds of training")
     parser.add_argument('--num_users', type=int, default=3, help="number of users: K")

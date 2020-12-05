@@ -1,18 +1,15 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import copy
-import numpy as np
-from torchvision import datasets, transforms
 import torch
 
-from utils.sampling import mnist_iid, mnist_noniid, cifar_iid
 from utils.options import args_parser
 from models.Update import LocalUpdate
 from models.Nets import MLP, CNNMnist, CNNCifar
 from models.Fed import FedAvg
 from models.test import test_img
 
-import DataBalance  # Import self-balanced algo
+import DataBalance
 import DataProcessor
 
 matplotlib.use('Agg')
@@ -24,36 +21,16 @@ if __name__ == '__main__':
     args.device = torch.device('cuda:{}'.format(args.gpu) if torch.cuda.is_available() and args.gpu != -1 else 'cpu')
     # new instances for DataProcessor and DataBalance
     dp = DataProcessor.DataProcessor()
-    dp.size_device = 4
-    dp.local_train_label = ",,," # change the parameters
-    db = DataBalance.DataBalance(dp)
-
     dp.get_input('mnist')
     dp.gen_size_imbalance([5000, 2000, 1000])
-    
 
-    # load dataset and split users
-    '''
-    if args.dataset == 'mnist':
-        trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-        dataset_train = datasets.MNIST('../data/mnist/', train=True, download=True, transform=trans_mnist)
-        dataset_test = datasets.MNIST('../data/mnist/', train=False, download=True, transform=trans_mnist)
-        # sample users
-        if args.iid:
-            dict_users = mnist_iid(dataset_train, args.num_users)
-        else:
-            dict_users = mnist_noniid(dataset_train, args.num_users)
-    elif args.dataset == 'cifar':
-        trans_cifar = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        dataset_train = datasets.CIFAR10('../data/cifar', train=True, download=True, transform=trans_cifar)
-        dataset_test = datasets.CIFAR10('../data/cifar', train=False, download=True, transform=trans_cifar)
-        if args.iid:
-            dict_users = cifar_iid(dataset_train, args.num_users)
-        else:
-            exit('Error: only consider IID setting in CIFAR10')
+    db = DataBalance.DataBalance(dp)
+    if args.balance:
+        db.z_score()
+        db.assign_clients()
     else:
-        exit('Error: unrecognized dataset')
-    '''
+        db.assign_clients(False)
+    # load dataset and split users
     img_size = dp[0][0].shape
 
     # build model
@@ -84,10 +61,6 @@ if __name__ == '__main__':
     val_acc_list, net_list = [], []
 
     # originally assign clients and Fed Avg -> mediator Fed Avg
-    ##########################################################
-    db.assign_clients()
-    #print (db.mediator)
-    ##########################################################
     if args.all_clients: 
         print("Aggregation over all clients")
         w_locals = [w_glob for i in range(args.num_users)]
