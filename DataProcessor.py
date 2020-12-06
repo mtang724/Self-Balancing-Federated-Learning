@@ -143,6 +143,8 @@ class DataProcessor:
         self.size_device = num_device
         self.local_train_feature = []
         self.local_train_label = []
+        # init local train index
+        self.local_train_index = []
 
         # separate data set by label 0 - 9
         feature_by_class = []
@@ -195,6 +197,8 @@ class DataProcessor:
         self.size_device = len(list_size)
         self.local_train_feature = []
         self.local_train_label = []
+        # init local_train_index
+        self.local_train_index = []
 
         need_idx = np.arange(len(self.train_feature))
         np.random.shuffle(need_idx)

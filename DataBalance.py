@@ -120,6 +120,7 @@ class DataBalance:
 
             rand_select = random.random()
             image_aug = None
+            image = image.astype(np.uint8)
             # augment the new image
             if rand_select < 0.25:
                 image_aug = self.rotate(image)
