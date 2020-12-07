@@ -65,11 +65,11 @@ def train(net_glob, db, w_glob, args):
     return net_glob
 
 
-def test(net_glob, dp, args):
+def test(net_glob, dp, args, is_self_balanced, imbalanced_way):
     net_glob.eval()
-    acc_train, loss_train = test_img(net_glob, dp, args)
+    acc_train, loss_train = test_img(net_glob, dp, args, is_self_balanced, imbalanced_way)
     dp.type = 'test'
-    acc_test, loss_test = test_img(net_glob, dp, args)
+    acc_test, loss_test = test_img(net_glob, dp, args, is_self_balanced, imbalanced_way)
     print("Training accuracy: {:.2f}".format(acc_train))
     print("Testing accuracy: {:.2f}".format(acc_test))
 
@@ -81,12 +81,16 @@ if __name__ == '__main__':
     # new instances for DataProcessor and DataBalance
     dp = DataProcessor.DataProcessor()
     dp.get_input('mnist')
+    imbalanced_way = ""
     if args.size_balance:
         dp.gen_size_imbalance([5000, 2000, 1000])
+        imbalanced_way = "size"
     elif args.local_balance:
-        dp.gen_local_imbalance(10, 5000, 0)
+        dp.gen_local_imbalance(10, 5000, 0.8)
+        imbalanced_way = "local"
     elif args.global_balance:
         dp.gen_global_imbalance(5, 2000, [500, 500, 1000, 1000, 1500, 1500, 3000, 1000, 0, 0])
+        imbalanced_way = "global"
     # without self-balanced
     db = DataBalance.DataBalance(dp)
     db.assign_clients(False)
@@ -112,7 +116,7 @@ if __name__ == '__main__':
     # copy weights
     w_glob = net_glob.state_dict()
     train(net_glob, db, w_glob, args)
-    test(net_glob, dp, args)
+    test(net_glob, dp, args, "non-self_balanced", imbalanced_way)
 
     # build new model
     net_glob = None
@@ -137,4 +141,4 @@ if __name__ == '__main__':
     db.assign_clients()
     dp.type = "train"
     train(net_glob, db, w_glob, args)
-    test(net_glob, dp, args)
+    test(net_glob, dp, args,  "self_balanced", imbalanced_way)
