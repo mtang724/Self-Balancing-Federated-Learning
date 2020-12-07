@@ -9,6 +9,7 @@ def args_parser():
     parser.add_argument("--balance", action='store_true', help='whether we balance the dataset')
     parser.add_argument("--size_balance", action='store_true', help='is there size imbalanced')
     parser.add_argument("--local_balance", action='store_true', help='is there size imbalanced')
+    parser.add_argument("--global_balance", action='store_true', help='is there global imbalanced')
     # federated arguments
     parser.add_argument('--epochs', type=int, default=10, help="rounds of training")
     parser.add_argument('--num_users', type=int, default=3, help="number of users: K")

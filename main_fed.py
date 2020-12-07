@@ -85,6 +85,8 @@ if __name__ == '__main__':
         dp.gen_size_imbalance([5000, 2000, 1000])
     elif args.local_balance:
         dp.gen_local_imbalance(10, 5000, 0)
+    elif args.global_balance:
+        dp.gen_global_imbalance(5, 2000, [500, 500, 1000, 1000, 1500, 1500, 3000, 1000, 0, 0])
     # without self-balanced
     db = DataBalance.DataBalance(dp)
     db.assign_clients(False)

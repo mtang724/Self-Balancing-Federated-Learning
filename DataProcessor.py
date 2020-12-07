@@ -252,6 +252,7 @@ class DataProcessor:
         # initialize global train features and labels
         self.global_train_feature = np.empty((0, self.size_feature), dtype=np.int)
         self.global_train_label = np.array([], dtype=np.int)
+        self.local_train_index = []
         idx_start = 0
         for i in range(self.size_device):
             self.global_train_feature = np.vstack([self.global_train_feature, self.local_train_feature[i]])
