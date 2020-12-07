@@ -33,7 +33,10 @@ class DataProcessor:
         self.data_source = None
 
     def __len__(self):
-        return len(self.global_train_label)
+        if self.type == 'train':
+            return len(self.global_train_label)
+        else:
+            return len(self.test_label)
 
     def __getitem__(self, idx):
         if self.type == 'train':
