@@ -6,7 +6,7 @@ Mingyue Tang (6295173646): Read Literatures and looking for baseline code, imple
 
 Xinrui Li: Read Literatures and looking for baseline code, implemented z-score calculation, implemented mediator based stochastic gradient descent, relative part of the research report
 
-Zhige Li: Literature review on distributed deep learning framework; Implemented three different imbalance evaluation and generation; Implemented data augmentation and down sampling algorithm; Implemented greedy mediator selection algorithm; System design on coding; Relative part of the research report
+Zhige Li (7795538838): Literature review on distributed deep learning framework; Implemented three different imbalance evaluation and generation; Implemented data augmentation and down sampling algorithm; Implemented greedy mediator selection algorithm; System design on coding; Relative part of the research report
 
 Xinhe Yang: Learn about federated learning programming in tensorflow doc. Looking for baseline code. Wrote code about data separation and processing
 
