@@ -8,7 +8,7 @@ Xinrui Li: Read Literatures and looking for baseline code, implemented z-score c
 
 Zhige Li: Literature review on distributed deep learning framework; Implemented three different imbalance evaluation and generation; Implemented data augmentation and down sampling algorithm; Implemented greedy mediator selection algorithm; System design on coding; Relative part of the research report
 
-Xinhe Yang: Learn about federated learning programming in tensorflow doc. Looking for baseline code. Wrote code about data separation and processing, weekly meeting with all group members
+Xinhe Yang: Learn about federated learning programming in tensorflow doc. Looking for baseline code. Wrote code about data separation and processing
 
 
 ## Goal: Try to solve data imbalance problem in Federated Learning
@@ -93,9 +93,9 @@ Global Imbalance:
 
 ### Result:
 
-**Running Parameter:** --size_balance(local_balance/gloabal_balance) --confusion_matrix --epochs 10 --gpu -1
+**Running Parameter:** --size_balance(local_balance/global_balance) --confusion_matrix --epochs 10 --gpu -1
 
-**Test Set Comparsion Result**
+**Test Set Comparison Result**
 
 |  Imbalance Type  | Baseline Model Test Set Accuracy | Self-balanced Model Test Set Accuracy |
 | :--------------: |  :-------------:  |  :-------------: |
@@ -103,7 +103,9 @@ Global Imbalance:
 | Local Imbalance  | 88.42% |89.46%|
 | global Imbalance |      84.08%      |      87.03%      |
 
-The self-balance model outperformed the baseline model in all three conditions with a 10 epochs training. There are 5.83% improvement on the size imbalance situation, 1.04% on local imbalance, 2.92% on global imblance with the same experiment setup.
+The self-balance model outperformed the baseline model in all three conditions with a 10 epochs training. There are 5.83% improvement on the size imbalance situation, 1.04% on local imbalance, 2.92% on global imbalance with the same experiment setup. 
+
+From the result, we can observe that the augmentation and down sampling method plays a significant role for size balance and global balance problem. However, the greedy mediator selection method does not give much support. However, from the experiment we do observe that each mediator successfully has the similar distribution with the global. So It could be caused by the sequential training of the mediator selection. So we can leave it as a future work to discuss how to better improve the result with the balanced mediator.
 
 #### Detailed breakdown:
 
@@ -138,4 +140,6 @@ From the confusion matrix, the **self-balance model** do not have significant im
 ![](test_figures/confusion_matrix_self_balanced_global.png)<center><b>Figure. Self-Balance Model Test Confusion Matrix on Global Imbalance</b></center>
 
 From the confusion matrix, the **self-balance model** has better classification result almost in every class (9/10) which can be observed clearly in the figure. So it has higher f1 score and test accuracy than **baseline model**. 
+
+
 
