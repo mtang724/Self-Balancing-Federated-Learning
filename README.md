@@ -52,14 +52,14 @@ https://github.com/chaoyanghe/Awesome-Federated-Learning#Benchmark-and-Dataset
 ### Result:
 
 Baseline Code Result
-|  Imbalance Type  | Training Accuracy | Testing Accuract |
+|  Imbalance Type  | Training Accuracy | Testing Accuracy |
 | :--------------: |  :-------------:  |  :-------------: |
 | Size Imbalance   |   |
 | Local Imbalance  |   |
 | global Imbalance |      72.60%       |      68.06%      |
 
 New Algorithm with Mediator
-|  Imbalance Type  | Training Accuracy | Testing Accuract |
+|  Imbalance Type  | Training Accuracy | Testing Accuracy |
 | :--------------: |  :-------------:  |  :-------------: |
 | Size Imbalance   |   |
 | Local Imbalance  |   |
