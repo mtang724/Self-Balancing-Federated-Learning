@@ -3,6 +3,7 @@
 **Group Member:**
 
 Mingyue Tang (6295173646): Read Literatures and looking for baseline code, implemented part of the algorithm (federated Learning training, and testing) , wrote part of the research report, weekly meeting with all group members
+
 Xinrui Li: Read Literatures and looking for baseline code, implemented part of the algorithm (federated Learning training: algorithm 1 and algorithm 2) , wrote part of the research report, weekly meeting with all group members
 
 
