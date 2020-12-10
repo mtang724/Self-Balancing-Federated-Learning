@@ -6,6 +6,8 @@ Mingyue Tang (6295173646): Read Literatures and looking for baseline code, imple
 
 Xinrui Li: Read Literatures and looking for baseline code, implemented part of the algorithm (federated Learning training: algorithm 1 and algorithm 2) , wrote part of the research report, weekly meeting with all group members
 
+Xinhe Yang: Learn about federated learning programming in tensorflow doc. Looking for baseline code. Wrote code about data separation and processing, weekly meeting with all group members
+
 
 ## Goal: Try to solve data imbalance problem in Federated Learning
 
@@ -81,7 +83,7 @@ Local Imbalance:
 - device_size: device_size is the size of each device (it's an integer, not a list, as each device should have the same size)
 - alpha: Alpha = 0 means full random sampling, totally balanced, Alpha = 1 means no sampling, each device takes only one class, totally imbalanced
 
-Glabal Imbalance:
+Global Imbalance:
 
 - num_device: num_device indicates the number of the devices
 - device_size: device_size is the size of each device (it's an integer, not a list, as each device should have the same size)
@@ -97,9 +99,9 @@ Glabal Imbalance:
 | :--------------: |  :-------------:  |  :-------------: |
 | Size Imbalance   | 81.22% |87.05%|
 | Local Imbalance  | 88.42% |89.46%|
-| global Imbalance |      68.06%      |      70.95%      |
+| global Imbalance |      84.08%      |      87.03%      |
 
-The self-balance model outperformed the baseline model in all three conditions with a 10 epochs training. There are 5.83% improvement on the size imbalance situation, 1.04% on local imbalance, 2.89% on global imblance with the same experiment setup.
+The self-balance model outperformed the baseline model in all three conditions with a 10 epochs training. There are 5.83% improvement on the size imbalance situation, 1.04% on local imbalance, 2.92% on global imblance with the same experiment setup.
 
 #### Detailed breakdown:
 
@@ -113,7 +115,7 @@ The self-balance model outperformed the baseline model in all three conditions w
 
 <center><b>Figure. Self-balance Model Test Confusion Matrix on Size Imbalance</b></center>
 
-From the confusion matrix, it's clear to see the **self-balance model** have better classification result on almost every classes(9/10). Better in both precision and recall. So overall, it has a better F1 score than the **baseline model**
+From the confusion matrix, it's clear to see the **self-balance model** have better classification result on almost every class(9/10). Better in both precision and recall. So overall, it has a better F1 score than the **baseline model**.
 
 **Local Balance:**
 
@@ -124,4 +126,14 @@ From the confusion matrix, it's clear to see the **self-balance model** have bet
 ![](test_figures/confusion_matrix_self_balanced_local.png)<center><b>Figure. Self-Balance Model Test Confusion Matrix on Local Imbalance</b></center>
 
 From the confusion matrix, the **self-balance model** do not have significant improvement accourding to the classes (6/10 are outperformed). It narrowly beats the baseline function on both accuarcy and f1 scores. 
+
+**Global Balance:**
+
+![](test_figures/confusion_matrix_non-self_balanced_global.png)
+
+<center><b>Figure. Baseline Model Test Confusion Matrix on Global Imbalance</b></center>
+
+![](test_figures/confusion_matrix_self_balanced_global.png)<center><b>Figure. Self-Balance Model Test Confusion Matrix on Global Imbalance</b></center>
+
+From the confusion matrix, the **self-balance model** has better classification result almost in every class (9/10) which can be observed clearly in the figure. So it has higher f1 score and test accuracy than **baseline model**. 
 
