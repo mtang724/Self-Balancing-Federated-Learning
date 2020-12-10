@@ -8,7 +8,7 @@ Xinrui Li: Read Literatures and looking for baseline code, implemented z-score c
 
 Zhige Li: Literature review on distributed deep learning framework; Implemented three different imbalance evaluation and generation; Implemented data augmentation and down sampling algorithm; Implemented greedy mediator selection algorithm; System design on coding; Relative part of the research report
 
-Xinhe Yang: Learn about federated learning programming in tensorflow doc. Looking for baseline code. Wrote code about data separation and processing
+Xinhe Yang: Learn about framework of federated learning and distributed system. Looking for baseline code. Implemented data separation and processing and relative part of the research report
 
 
 ## Goal: Try to solve data imbalance problem in Federated Learning
