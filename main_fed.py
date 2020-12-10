@@ -12,6 +12,8 @@ from models.test import test_img
 import DataBalance
 import DataProcessor
 
+import numpy as np
+
 matplotlib.use('Agg')
 
 
@@ -27,24 +29,24 @@ def train(net_glob, db, w_glob, args):
     # originally assign clients and Fed Avg -> mediator Fed Avg
     if args.all_clients:
         print("Aggregation over all clients")
-        w_locals = [w_glob for i in range(args.num_users)]
+        w_locals = [w_glob for i in range(len(db.dp.mediator))]
     # 3 : for each synchronization round r=1; 2; . . . ; R do
     for iter in range(args.epochs):
         # 4 : for each mediator m in 1; 2; . . . ; M parallelly do
-        for mdt in db.mediator:
+        for i, mdt in enumerate(db.mediator):
             # 5- :
             loss_locals = []
             if not args.all_clients:
                 w_locals = []
-            for client in mdt:
-                local = LocalUpdate(args=args, dataset=dp, idxs=dp.local_train_index[client])
-                w, loss = local.train(
-                    net=copy.deepcopy(net_glob).to(args.device))  # for lEpoch in range(E): 在local.train完成
-                if args.all_clients:
-                    w_locals[client] = copy.deepcopy(w)
-                else:
-                    w_locals.append(copy.deepcopy(w))
-                loss_locals.append(copy.deepcopy(loss))
+            need_index = [db.dp.local_train_index[k] for k in mdt]
+            local = LocalUpdate(args=args, dataset=dp, idxs=np.hstack(need_index))
+            w, loss = local.train(
+                net=copy.deepcopy(net_glob).to(args.device))  # for lEpoch in range(E): 在local.train完成
+            if args.all_clients:
+                w_locals[i] = copy.deepcopy(w)
+            else:
+                w_locals.append(copy.deepcopy(w))
+            loss_locals.append(copy.deepcopy(loss))
 
         # update global weights
         w_glob = FedAvg(w_locals)
