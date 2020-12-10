@@ -57,7 +57,7 @@ Baseline Code Result
 | Size Imbalance   |   |
 | Local Imbalance  |   |
 | global Imbalance |      72.60%       |      68.06%      |
-\
+
 New Algorithm with Mediator
 |  Imbalance Type  | Training Accuracy | Testing Accuract |
 | :--------------: |  :-------------:  |  :-------------: |
