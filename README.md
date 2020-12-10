@@ -1,4 +1,16 @@
 # CSCI596-FedLearningProject
+
+**Group Member:**
+
+Mingyue Tang (6295173646): Read Literatures and looking for baseline code, implemented z-score calculation, implemented mediator based stochastic gradient descent, relative part of the research report
+
+Xinrui Li: Read Literatures and looking for baseline code, implemented z-score calculation, implemented mediator based stochastic gradient descent, relative part of the research report
+
+Zhige Li: Literature review on distributed deep learning framework; Implemented three different imbalance evaluation and generation; Implemented data augmentation and down sampling algorithm; Implemented greedy mediator selection algorithm; System design on coding; Relative part of the research report
+
+Xinhe Yang: Learn about federated learning programming in tensorflow doc. Looking for baseline code. Wrote code about data separation and processing
+
+
 ## Goal: Try to solve data imbalance problem in Federated Learning
 
 ### Background:
@@ -48,3 +60,86 @@ https://github.com/chaoyanghe/Awesome-Federated-Learning#Benchmark-and-Dataset
 - Run evaluation pipeline
 - Improve the baseline by https://docs.google.com/document/d/1qa0Cv-axRw9ZSVDB-C5YZMp9lEd6qp3d1FmzX7D8Mgg/edit methods
 - Propose our own method (optional)
+
+### Experiment:
+
+#### Experiment Setup:
+
+We ran three groups of experiments with three different imbalanced conditions, size-imbalance, local-imbalance, and global-imbalance. Each group contained two experiments, one is for the baseline model and another one is for our proposed self-balanced model. 
+
+**Global Parameters:**
+
+All the default parameters are in utils/options.py, for the seek of fairness we have the same set of global parameters for all the running experiments
+
+**Imbalanced Dataset Parameters setup:**
+
+To ensure each group of experiment is running on a same distributed imbalance dataset, we wrote our own dataset generation method in DataBalance.py and DataProcessor.py. Different imbalance type has different set of parameters need to be set.
+
+Size Imbalance:
+
+- list_size: list_size is a size indicates the size of each device
+
+Local Imbalance:
+
+- num_device: num_device indicates the number of the devices
+- device_size: device_size is the size of each device (it's an integer, not a list, as each device should have the same size)
+- alpha: Alpha = 0 means full random sampling, totally balanced, Alpha = 1 means no sampling, each device takes only one class, totally imbalanced
+
+Global Imbalance:
+
+- num_device: num_device indicates the number of the devices
+- device_size: device_size is the size of each device (it's an integer, not a list, as each device should have the same size)
+- num_each_class: num_each_class is a list indicating the number for each class
+
+### Result:
+
+**Running Parameter:** --size_balance(local_balance/global_balance) --confusion_matrix --epochs 10 --gpu -1
+
+**Test Set Comparison Result**
+
+|  Imbalance Type  | Baseline Model Test Set Accuracy | Self-balanced Model Test Set Accuracy |
+| :--------------: |  :-------------:  |  :-------------: |
+| Size Imbalance   | 81.22% |87.05%|
+| Local Imbalance  | 88.42% |89.46%|
+| global Imbalance |      84.08%      |      87.03%      |
+
+The self-balance model outperformed the baseline model in all three conditions with a 10 epochs training. There are 5.83% improvement on the size imbalance situation, 1.04% on local imbalance, 2.92% on global imbalance with the same experiment setup. 
+
+From the result, we can observe that the augmentation and down sampling method plays a significant role for size balance and global balance problem. However, the greedy mediator selection method does not give much support. However, from the experiment we do observe that each mediator successfully has the similar distribution with the global. So It could be caused by the sequential training of the mediator selection. So we can leave it as a future work to discuss how to better improve the result with the balanced mediator.
+
+#### Detailed breakdown:
+
+##### Size-Balance
+
+![](test_figures/confusion_matrix_non-self_balanced_size.png)
+
+<center><b>Figure. Baseline Model Test Confusion Matrix on Size Imbalance</b></center>
+
+![](test_figures/confusion_matrix_self_balanced_size.png)
+
+<center><b>Figure. Self-balance Model Test Confusion Matrix on Size Imbalance</b></center>
+
+From the confusion matrix, it's clear to see the **self-balance model** have better classification result on almost every class(9/10). Better in both precision and recall. So overall, it has a better F1 score than the **baseline model**.
+
+**Local Balance:**
+
+![](test_figures/confusion_matrix_non-self_balanced_local.png)
+
+<center><b>Figure. Baseline Model Test Confusion Matrix on Local Imbalance</b></center>
+
+![](test_figures/confusion_matrix_self_balanced_local.png)<center><b>Figure. Self-Balance Model Test Confusion Matrix on Local Imbalance</b></center>
+
+From the confusion matrix, the **self-balance model** do not have significant improvement accourding to the classes (6/10 are outperformed). It narrowly beats the baseline function on both accuarcy and f1 scores. 
+
+**Global Balance:**
+
+![](test_figures/confusion_matrix_non-self_balanced_global.png)
+
+<center><b>Figure. Baseline Model Test Confusion Matrix on Global Imbalance</b></center>
+
+![](test_figures/confusion_matrix_self_balanced_global.png)<center><b>Figure. Self-Balance Model Test Confusion Matrix on Global Imbalance</b></center>
+
+From the confusion matrix, the **self-balance model** has better classification result almost in every class (9/10) which can be observed clearly in the figure. So it has higher f1 score and test accuracy than **baseline model**. 
+
+
+
