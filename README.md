@@ -1,8 +1,8 @@
-# CSCI596-FedLearningProject
+# Self-Balancing Federated Learning With Global Imbalanced Data in Mobile Systems
 
 **Group Member:**
 
-Mingyue Tang (6295173646): Read Literatures and looking for baseline code, implemented z-score calculation, implemented mediator based stochastic gradient descent, relative part of the research report
+Mingyue Tang: Read Literatures and looking for baseline code, implemented z-score calculation, implemented mediator based stochastic gradient descent, relative part of the research report
 
 Xinrui Li: Read Literatures and looking for baseline code, implemented z-score calculation, implemented mediator based stochastic gradient descent, relative part of the research report
 
