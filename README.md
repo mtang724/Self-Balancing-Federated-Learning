@@ -1,3 +1,7 @@
+# Important Notice:
+
+This code was our class project years ago, which means we are not the authors of this paper nor continue to maintain this project. We are so sorry, but we cannot provide further help with this code. 
+
 # Self-Balancing Federated Learning With Global Imbalanced Data in Mobile Systems
 
 **Group Member:**
